@@ -3,53 +3,53 @@ import { createHandler } from '../../utils/client.js';
 import { registry } from '../../utils/registry.js';
 import { CommandHandler } from '../../utils/registry.js';
 
-// 定义参数类型
+// Define parameter types
 const notebookSchema = z.object({
-    notebook: z.string().describe('笔记本 ID')
+    notebook: z.string().describe('Notebook ID')
 });
 
 const notebookAndNameSchema = z.object({
-    notebook: z.string().describe('笔记本 ID'),
-    name: z.string().describe('新名称')
+    notebook: z.string().describe('Notebook ID'),
+    name: z.string().describe('New name')
 });
 
 const nameSchema = z.object({
-    name: z.string().describe('笔记本名称')
+    name: z.string().describe('Notebook name')
 });
 
 const notebookAndConfSchema = z.object({
-    notebook: z.string().describe('笔记本 ID'),
+    notebook: z.string().describe('Notebook ID'),
     conf: z.object({
-        name: z.string().optional().describe('笔记本名称'),
-        closed: z.boolean().optional().describe('是否关闭'),
-        refCreateSavePath: z.string().optional().describe('新建文档存储路径'),
-        createDocNameTemplate: z.string().optional().describe('新建文档名称模板'),
-        dailyNoteSavePath: z.string().optional().describe('每日笔记存储路径'),
-        dailyNoteTemplate: z.string().optional().describe('每日笔记模板')
-    }).describe('笔记本配置')
+        name: z.string().optional().describe('Notebook name'),
+        closed: z.boolean().optional().describe('Whether it is closed'),
+        refCreateSavePath: z.string().optional().describe('Save path for new documents'),
+        createDocNameTemplate: z.string().optional().describe('New document name template'),
+        dailyNoteSavePath: z.string().optional().describe('Daily note save path'),
+        dailyNoteTemplate: z.string().optional().describe('Daily note template')
+    }).describe('Notebook configuration')
 });
 
 const namespace = 'notebook';
 
-// 列出笔记本
+// List notebooks
 const lsNotebooksHandler: CommandHandler = {
     namespace,
     name: 'lsNotebooks',
-    description: '列出所有笔记本',
+    description: 'List all notebooks',
     params: z.object({}),
     handler: createHandler('/api/notebook/lsNotebooks'),
     documentation: {
-        description: '列出所有笔记本',
+        description: 'List all notebooks',
         params: {},
         returns: {
             type: 'array',
-            description: '笔记本列表',
+            description: 'List of notebooks',
             properties: {
-                id: '笔记本 ID',
-                name: '笔记本名称',
-                icon: '笔记本图标',
-                sort: '排序权重',
-                closed: '是否关闭'
+                id: 'Notebook ID',
+                name: 'Notebook name',
+                icon: 'Notebook icon',
+                sort: 'Sort weight',
+                closed: 'Whether it is closed'
             }
         },
         examples: [
@@ -60,7 +60,7 @@ const lsNotebooksHandler: CommandHandler = {
                     notebooks: [
                         {
                             id: "20210817205410-2kvfpfn",
-                            name: "测试笔记本",
+                            name: "Test Notebook",
                             icon: "1f4d4",
                             sort: 0,
                             closed: false
@@ -73,25 +73,25 @@ const lsNotebooksHandler: CommandHandler = {
     }
 };
 
-// 打开笔记本
+// Open notebook
 const openNotebookHandler: CommandHandler = {
     namespace,
     name: 'openNotebook',
-    description: '打开笔记本',
+    description: 'Open notebook',
     params: notebookSchema,
     handler: createHandler('/api/notebook/openNotebook'),
     documentation: {
-        description: '打开笔记本',
+        description: 'Open notebook',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {}
         },
         examples: [
@@ -107,25 +107,25 @@ const openNotebookHandler: CommandHandler = {
     }
 };
 
-// 关闭笔记本
+// Close notebook
 const closeNotebookHandler: CommandHandler = {
     namespace,
     name: 'closeNotebook',
-    description: '关闭笔记本',
+    description: 'Close notebook',
     params: notebookSchema,
     handler: createHandler('/api/notebook/closeNotebook'),
     documentation: {
-        description: '关闭笔记本',
+        description: 'Close notebook',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {}
         },
         examples: [
@@ -141,30 +141,30 @@ const closeNotebookHandler: CommandHandler = {
     }
 };
 
-// 重命名笔记本
+// Rename notebook
 const renameNotebookHandler: CommandHandler = {
     namespace,
     name: 'renameNotebook',
-    description: '重命名笔记本',
+    description: 'Rename notebook',
     params: notebookAndNameSchema,
     handler: createHandler('/api/notebook/renameNotebook'),
     documentation: {
-        description: '重命名笔记本',
+        description: 'Rename notebook',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             },
             name: {
                 type: 'string',
-                description: '新名称',
+                description: 'New name',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {}
         },
         examples: [
@@ -172,7 +172,7 @@ const renameNotebookHandler: CommandHandler = {
                 description: 'This example demonstrates changing the display name of an existing notebook while maintaining all its contents and settings.',
                 params: {
                     notebook: "20210817205410-2kvfpfn",
-                    name: "新笔记本名称"
+                    name: "New Notebook Name"
                 },
                 response: {}
             }
@@ -181,34 +181,34 @@ const renameNotebookHandler: CommandHandler = {
     }
 };
 
-// 创建笔记本
+// Create notebook
 const createNotebookHandler: CommandHandler = {
     namespace,
     name: 'createNotebook',
-    description: '创建笔记本',
+    description: 'Create notebook',
     params: nameSchema,
     handler: createHandler('/api/notebook/createNotebook'),
     documentation: {
-        description: '创建笔记本',
+        description: 'Create notebook',
         params: {
             name: {
                 type: 'string',
-                description: '笔记本名称',
+                description: 'Notebook name',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {
-                notebook: '新创建的笔记本 ID'
+                notebook: 'ID of the newly created notebook'
             }
         },
         examples: [
             {
                 description: 'This example shows how to create a new notebook with a specified name, which will be initialized with default settings and structure.',
                 params: {
-                    name: "新笔记本"
+                    name: "New Notebook"
                 },
                 response: {
                     notebook: "20210817205410-2kvfpfn"
@@ -219,25 +219,25 @@ const createNotebookHandler: CommandHandler = {
     }
 };
 
-// 删除笔记本
+// Delete notebook
 const removeNotebookHandler: CommandHandler = {
     namespace,
     name: 'removeNotebook',
-    description: '删除笔记本',
+    description: 'Delete notebook',
     params: notebookSchema,
     handler: createHandler('/api/notebook/removeNotebook'),
     documentation: {
-        description: '删除笔记本',
+        description: 'Delete notebook',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {}
         },
         examples: [
@@ -253,32 +253,32 @@ const removeNotebookHandler: CommandHandler = {
     }
 };
 
-// 获取笔记本配置
+// Get notebook configuration
 const getNotebookConfHandler: CommandHandler = {
     namespace,
     name: 'getNotebookConf',
-    description: '获取笔记本配置',
+    description: 'Get notebook configuration',
     params: notebookSchema,
     handler: createHandler('/api/notebook/getNotebookConf'),
     documentation: {
-        description: '获取笔记本配置',
+        description: 'Get notebook configuration',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '笔记本配置',
+            description: 'Notebook configuration',
             properties: {
-                name: '笔记本名称',
-                closed: '是否关闭',
-                refCreateSavePath: '新建文档存储路径',
-                createDocNameTemplate: '新建文档名称模板',
-                dailyNoteSavePath: '每日笔记存储路径',
-                dailyNoteTemplate: '每日笔记模板'
+                name: 'Notebook name',
+                closed: 'Whether it is closed',
+                refCreateSavePath: 'Save path for new documents',
+                createDocNameTemplate: 'New document name template',
+                dailyNoteSavePath: 'Daily note save path',
+                dailyNoteTemplate: 'Daily note template'
             }
         },
         examples: [
@@ -288,7 +288,7 @@ const getNotebookConfHandler: CommandHandler = {
                     notebook: "20210817205410-2kvfpfn"
                 },
                 response: {
-                    name: "测试笔记本",
+                    name: "Test Notebook",
                     closed: false,
                     refCreateSavePath: "/",
                     createDocNameTemplate: "${title}",
@@ -301,39 +301,39 @@ const getNotebookConfHandler: CommandHandler = {
     }
 };
 
-// 设置笔记本配置
+// Set notebook configuration
 const setNotebookConfHandler: CommandHandler = {
     namespace,
     name: 'setNotebookConf',
-    description: '设置笔记本配置',
+    description: 'Set notebook configuration',
     params: notebookAndConfSchema,
     handler: createHandler('/api/notebook/setNotebookConf'),
     documentation: {
-        description: '设置笔记本配置',
+        description: 'Set notebook configuration',
         params: {
             notebook: {
                 type: 'string',
-                description: '笔记本 ID',
+                description: 'Notebook ID',
                 required: true
             },
             conf: {
                 type: 'object',
-                description: '笔记本配置',
+                description: 'Notebook configuration',
                 required: true
             }
         },
         returns: {
             type: 'object',
-            description: '操作结果',
+            description: 'Operation result',
             properties: {}
         },
         examples: [
             {
-                description: '设置笔记本配置',
+                description: 'Set notebook configuration',
                 params: {
                     notebook: "20210817205410-2kvfpfn",
                     conf: {
-                        name: "测试笔记本",
+                        name: "Test Notebook",
                         closed: false,
                         refCreateSavePath: "/",
                         createDocNameTemplate: "${title}",
@@ -348,7 +348,7 @@ const setNotebookConfHandler: CommandHandler = {
     }
 };
 
-// 注册所有笔记本相关命令
+// Register all notebook related commands
 export function registerNotebookHandlers() {
     registry.registerCommand(lsNotebooksHandler);
     registry.registerCommand(openNotebookHandler);

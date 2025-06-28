@@ -7,7 +7,7 @@ export interface SiYuanResponse<T = any> {
     data: T;
 }
 
-// 创建标准 handler 的工厂函数
+// Factory function to create a standard handler
 export function createHandler(endpoint: string): (params: unknown) => Promise<any> {
     return async (params: unknown) => {
         const response = await client.post(endpoint, params);
@@ -30,7 +30,7 @@ class SiYuanClient {
 
     private constructor() {
         if (!SiYuanClient.token) {
-            console.warn('警告：未设置 SIYUAN_TOKEN 环境变量，API 调用可能会失败');
+            console.warn('Warning: SIYUAN_TOKEN environment variable is not set, API calls may fail');
         }
 
         this.axiosInstance = axios.create({
@@ -41,20 +41,20 @@ class SiYuanClient {
             }
         });
 
-        // 添加响应拦截器
+        // Add a response interceptor
         this.axiosInstance.interceptors.response.use(
             response => response.data,
             error => {
-                // 增强错误处理
+                // Enhanced error handling
                 if (error.response) {
-                    console.error('API 响应错误:', {
+                    console.error('API response error:', {
                         status: error.response.status,
                         data: error.response.data
                     });
                 } else if (error.request) {
-                    console.error('API 请求错误:', error.message);
+                    console.error('API request error:', error.message);
                 } else {
-                    console.error('其他错误:', error.message);
+                    console.error('Other error:', error.message);
                 }
                 return Promise.reject(error);
             }
@@ -68,7 +68,7 @@ class SiYuanClient {
         return SiYuanClient.instance;
     }
 
-    // 基础 HTTP 方法
+    // Basic HTTP methods
     async post<T = any>(url: string, data?: any): Promise<SiYuanResponse<T>> {
         return this.axiosInstance.post(url, data);
     }

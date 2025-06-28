@@ -19,7 +19,7 @@ import { registerSystemHandlers } from './tools/commands/system.js';
 import { registerConvertHandlers } from './tools/commands/convert.js';
 import { registerNetworkHandlers } from './tools/commands/network.js';
 
-// 创建 MCP 服务器实例
+// Create an MCP server instance
 const server = new McpServer({
     name: "siyuan-mcp-server",
     version: "1.0.0",
@@ -28,10 +28,10 @@ const server = new McpServer({
     },
 });
 
-// 创建传输层实例
+// Create a transport layer instance
 const transport = new StdioServerTransport();
 
-// 注册命令处理器
+// Register command handlers
 registerNotebookHandlers();
 registerFiletreeHandlers();
 registerBlockHandlers();
@@ -48,12 +48,12 @@ registerSystemHandlers();
 registerConvertHandlers();
 registerNetworkHandlers();
 
-// 注册工具
+// Register tools
 registerCommandTool(server);
 registerQueryTool(server);
 registerHelpTool(server);
 
-// 启动服务器
+// Start the server
 server.connect(transport);
 
 export { server };

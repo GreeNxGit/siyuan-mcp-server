@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * MCP 响应格式
+ * MCP Response Format
  */
 export interface McpResponse<T = any> {
     content: Array<{
@@ -13,49 +13,49 @@ export interface McpResponse<T = any> {
 }
 
 /**
- * 命令处理器接口
+ * Command Handler Interface
  */
 export interface CommandHandler<P = unknown> {
-    /** 命令命名空间 */
+    /** Command namespace */
     namespace: string;
-    /** 命令名称 */
+    /** Command name */
     name: string;
-    /** 命令描述 */
+    /** Command description */
     description: string;
-    /** 参数验证模式 */
+    /** Parameter validation schema */
     params: z.ZodSchema<P>;
-    /** 命令处理函数 */
+    /** Command handler function */
     handler: (params: P) => Promise<McpResponse>;
-    /** 命令文档 */
+    /** Command documentation */
     documentation?: {
-        /** 详细描述 */
+        /** Detailed description */
         description: string;
-        /** 参数说明 */
+        /** Parameter description */
         params: Record<string, {
             type: string;
             description: string;
             required: boolean;
         }>;
-        /** 返回值说明 */
+        /** Return value description */
         returns: {
             type: string;
             description: string;
             properties: Record<string, unknown>;
         };
-        /** 使用示例 */
+        /** Usage examples */
         examples: Array<{
             description: string;
             params: Record<string, unknown>;
             response: Record<string, unknown>;
         }>;
-        /** API 文档链接 */
+        /** API documentation link */
         apiLink?: string;
     };
 }
 
 /**
- * 命令注册表类
- * 用于管理和执行命令
+ * Command Registry Class
+ * Used to manage and execute commands
  */
 class CommandRegistry {
     private static instance: CommandRegistry | null = null;
@@ -66,7 +66,7 @@ class CommandRegistry {
     }
 
     /**
-     * 获取单例实例
+     * Get singleton instance
      */
     public static getInstance(): CommandRegistry {
         if (!CommandRegistry.instance) {
@@ -76,19 +76,19 @@ class CommandRegistry {
     }
 
     /**
-     * 获取完整命令名称
-     * @param namespace 命名空间
-     * @param name 命令名称
-     * @returns 完整命令名称
+     * Get full command name
+     * @param namespace Namespace
+     * @param name Command name
+     * @returns Full command name
      */
     private getFullCommandName(namespace: string, name: string): string {
         return `${namespace}.${name}`;
     }
 
     /**
-     * 解析完整命令名称
-     * @param fullName 完整命令名称
-     * @returns [命名空间, 命令名称]
+     * Parse full command name
+     * @param fullName Full command name
+     * @returns [namespace, command name]
      */
     private parseFullCommandName(fullName: string): [string, string] {
         const parts = fullName.split('.');
@@ -99,21 +99,21 @@ class CommandRegistry {
     }
 
     /**
-     * 注册命令
-     * @param command 命令处理器
-     * @throws {Error} 如果命令已存在会发出警告
+     * Register command
+     * @param command Command handler
+     * @throws {Error} Throws a warning if the command already exists
      */
     public registerCommand<P>(command: CommandHandler<P>): void {
         const fullName = this.getFullCommandName(command.namespace, command.name);
         if (this.commands.has(fullName)) {
-            console.warn(`警告：命令 ${fullName} 已存在，将被覆盖`);
+            console.warn(`Warning: Command ${fullName} already exists and will be overwritten`);
         }
         this.commands.set(fullName, command);
     }
 
     /**
-     * 获取命令列表
-     * @returns 命令列表的 MCP 响应
+     * Get command list
+     * @returns MCP response for the command list
      */
     public listCommands(namespace?: string, type?: string): McpResponse<Array<{
         namespace: string;
@@ -131,7 +131,7 @@ class CommandRegistry {
             if (type && !cmd.name.includes(type)) return false;
             return true;
         }).map(([fullName, cmd]) => {
-            // 获取参数说明
+            // Get parameter descriptions
             const params: Record<string, {
                 type: string;
                 description: string;
@@ -146,14 +146,14 @@ class CommandRegistry {
                             const isOptional = value instanceof z.ZodOptional;
                             params[key] = {
                                 type: value._def.typeName || 'unknown',
-                                description: value.description || '无说明',
+                                description: value.description || 'No description',
                                 required: !isOptional
                             };
                         }
                     });
                 }
             } catch {
-                // 如果无法获取 shape，返回空对象
+                // If shape cannot be obtained, return an empty object
             }
 
             const [cmdNamespace, cmdName] = this.parseFullCommandName(fullName);
@@ -168,17 +168,17 @@ class CommandRegistry {
         const commandList = commands.map(cmd => {
             const fullName = cmd.namespace ? `${cmd.namespace}.${cmd.name}` : cmd.name;
             const paramsList = Object.entries(cmd.params).map(([name, info]) => 
-                `    ${name}: ${info.type}${info.required ? ' (必填)' : ' (可选)'} - ${info.description}`
+                `    ${name}: ${info.type}${info.required ? ' (required)' : ' (optional)'} - ${info.description}`
             ).join('\n');
             
-            return `${fullName}: ${cmd.description}\n${paramsList ? `  参数:\n${paramsList}` : '  参数: 无参数'}`;
+            return `${fullName}: ${cmd.description}\n${paramsList ? `  Parameters:\n${paramsList}` : '  Parameters: No parameters'}`;
         }).join('\n\n');
 
         return {
             content: [
                 {
                     type: 'text',
-                    text: `可用命令列表：\n${commandList}`
+                    text: `Available command list:\n${commandList}`
                 }
             ],
             _meta: commands
@@ -186,16 +186,16 @@ class CommandRegistry {
     }
 
     /**
-     * 获取命令帮助信息
-     * @param commandName 命令名称
-     * @returns 命令帮助信息的 MCP 响应
+     * Get command help information
+     * @param commandName Command name
+     * @returns MCP response for the command help information
      */
     public getCommandHelp(commandName: string): McpResponse<CommandHandler['documentation']> {
-        // 尝试直接查找完整命令名
+        // Try to find the full command name directly
         let command = this.commands.get(commandName);
         
         if (!command) {
-            // 如果找不到，尝试解析命名空间
+            // If not found, try to parse the namespace
             const [namespace, name] = this.parseFullCommandName(commandName);
             const fullName = this.getFullCommandName(namespace, name);
             command = this.commands.get(fullName);
@@ -206,14 +206,14 @@ class CommandRegistry {
                 content: [
                     {
                         type: 'text',
-                        text: `命令 ${commandName} 不存在`
+                        text: `Command ${commandName} does not exist`
                     }
                 ],
                 isError: true
             };
         }
 
-        // 获取参数说明
+        // Get parameter descriptions
         const params: Record<string, {
             type: string;
             description: string;
@@ -228,14 +228,14 @@ class CommandRegistry {
                         const isOptional = value instanceof z.ZodOptional;
                         params[key] = {
                             type: value._def.typeName || 'unknown',
-                            description: value.description || '无说明',
+                            description: value.description || 'No description',
                             required: !isOptional
                         };
                     }
                 });
             }
         } catch {
-            // 如果无法获取 shape，返回空对象
+            // If shape cannot be obtained, return an empty object
         }
 
         const help = command.documentation || {
@@ -243,16 +243,16 @@ class CommandRegistry {
             params,
             returns: {
                 type: 'object',
-                description: '命令执行结果',
+                description: 'Command execution result',
                 properties: {}
             },
             examples: []
         };
 
-        // 格式化帮助信息
+        // Format help information
         const fullName = this.getFullCommandName(command.namespace, command.name);
         const paramsList = Object.entries(params).map(([name, info]) => 
-            `  ${name}: ${info.type}${info.required ? ' (必填)' : ' (可选)'}\n    ${info.description}`
+            `  ${name}: ${info.type}${info.required ? ' (required)' : ' (optional)'}\n    ${info.description}`
         ).join('\n');
 
         const returnInfo = help.returns;
@@ -261,27 +261,27 @@ class CommandRegistry {
         ).join('\n');
 
         const examplesList = help.examples.map(example => 
-            `示例：${example.description}\n` +
-            `  参数：${JSON.stringify(example.params, null, 2)}\n` +
-            `  响应：${JSON.stringify(example.response, null, 2)}`
+            `Example: ${example.description}\n` +
+            `  Parameters: ${JSON.stringify(example.params, null, 2)}\n` +
+            `  Response: ${JSON.stringify(example.response, null, 2)}`
         ).join('\n\n');
 
         const helpText = [
-            `命令: ${fullName}`,
-            `描述: ${help.description}`,
+            `Command: ${fullName}`,
+            `Description: ${help.description}`,
             '',
-            '参数:',
-            paramsList || '  无参数',
+            'Parameters:',
+            paramsList || '  No parameters',
             '',
-            '返回值:',
-            `  类型: ${returnInfo.type}`,
-            `  描述: ${returnInfo.description}`,
-            '  属性:',
-            propertiesList || '    无属性',
+            'Return Value:',
+            `  Type: ${returnInfo.type}`,
+            `  Description: ${returnInfo.description}`,
+            '  Properties:',
+            propertiesList || '    No properties',
             '',
-            examplesList ? '示例:\n' + examplesList : '示例: 无示例',
+            examplesList ? 'Examples:\n' + examplesList : 'Examples: No examples',
             '',
-            help.apiLink ? `API文档: ${help.apiLink}` : ''
+            help.apiLink ? `API Documentation: ${help.apiLink}` : ''
         ].filter(Boolean).join('\n');
 
         return {
@@ -296,18 +296,18 @@ class CommandRegistry {
     }
 
     /**
-     * 执行命令
-     * @param commandName 命令名称
-     * @param params 命令参数
-     * @returns 命令执行结果的 MCP 响应
-     * @throws {Error} 如果命令不存在或参数验证失败
+     * Execute command
+     * @param commandName Command name
+     * @param params Command parameters
+     * @returns MCP response for the command execution result
+     * @throws {Error} Throws an error if the command does not exist or parameter validation fails
      */
     public async executeCommand(commandName: string, params: unknown = {}): Promise<McpResponse> {
-        // 尝试直接查找完整命令名
+        // Try to find the full command name directly
         let command = this.commands.get(commandName);
         
         if (!command) {
-            // 如果找不到，尝试解析命名空间
+            // If not found, try to parse the namespace
             const [namespace, name] = this.parseFullCommandName(commandName);
             const fullName = this.getFullCommandName(namespace, name);
             command = this.commands.get(fullName);
@@ -318,7 +318,7 @@ class CommandRegistry {
                 content: [
                     {
                         type: 'text',
-                        text: `命令 ${commandName} 不存在`
+                        text: `Command ${commandName} does not exist`
                     }
                 ],
                 isError: true
@@ -338,7 +338,7 @@ class CommandRegistry {
                     content: [
                         {
                             type: 'text',
-                            text: `参数验证失败：\n${issues}`
+                            text: `Parameter validation failed:\n${issues}`
                         }
                     ],
                     isError: true
@@ -349,7 +349,7 @@ class CommandRegistry {
                 content: [
                     {
                         type: 'text',
-                        text: `命令执行失败：${error instanceof Error ? error.message : String(error)}`
+                        text: `Command execution failed: ${error instanceof Error ? error.message : String(error)}`
                     }
                 ],
                 isError: true

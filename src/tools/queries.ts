@@ -2,14 +2,14 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registry } from '../utils/registry.js';
 
-// 注册命令查询工具
+// Register command query tool
 export function registerQueryTool(server: McpServer) {
     server.tool(
         'queryCommands',
-        '查询可用的命令列表',
+        'Query the list of available commands',
         {
-            namespace: z.string().optional().describe('命令命名空间过滤'),
-            type: z.string().optional().describe('命令名称过滤')
+            namespace: z.string().optional().describe('Command namespace filter'),
+            type: z.string().optional().describe('Command name filter')
         },
         async ({ namespace, type }) => {
             try {
@@ -18,19 +18,19 @@ export function registerQueryTool(server: McpServer) {
                     type: cmd.namespace ? `${cmd.namespace}.${cmd.name}` : cmd.name,
                     description: cmd.description,
                     params: Object.entries(cmd.params)
-                        .map(([name, info]) => `${name}: ${info.type}${info.required ? ' (必填)' : ' (可选)'} - ${info.description}`)
-                        .join('\n    ') || '无参数'
+                        .map(([name, info]) => `${name}: ${info.type}${info.required ? ' (required)' : ' (optional)'} - ${info.description}`)
+                        .join('\n    ') || 'No parameters'
                 }));
                 
                 const commandList = commands.map(cmd => 
-                    `${cmd.type}: ${cmd.description}\n  参数: ${cmd.params}`
+                    `${cmd.type}: ${cmd.description}\n  Parameters: ${cmd.params}`
                 ).join('\n');
                 
                 return {
                     content: [
                         {
                             type: 'text' as const,
-                            text: `可用命令列表：\n${commandList}`
+                            text: `Available command list:\n${commandList}`
                         }
                     ],
                     _meta: {
@@ -43,7 +43,7 @@ export function registerQueryTool(server: McpServer) {
                     content: [
                         {
                             type: 'text' as const,
-                            text: error instanceof Error ? error.message : '查询失败'
+                            text: error instanceof Error ? error.message : 'Query failed'
                         }
                     ],
                     isError: true

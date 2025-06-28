@@ -2,14 +2,14 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registry } from '../utils/registry.js';
 
-// 注册命令执行工具
+// Register command execution tool
 export function registerCommandTool(server: McpServer) {
     server.tool(
         'executeCommand',
-        '执行指定的命令',
+        'Execute the specified command',
         {
-            type: z.string().describe('命令类型'),
-            params: z.record(z.any()).optional().describe('命令参数')
+            type: z.string().describe('Command type'),
+            params: z.record(z.any()).optional().describe('Command parameters')
         },
         async ({ type, params = {} }) => {
             try {
@@ -31,7 +31,7 @@ export function registerCommandTool(server: McpServer) {
                     content: [
                         {
                             type: 'text' as const,
-                            text: error instanceof Error ? error.message : '命令执行失败'
+                            text: error instanceof Error ? error.message : 'Command execution failed'
                         }
                     ],
                     isError: true

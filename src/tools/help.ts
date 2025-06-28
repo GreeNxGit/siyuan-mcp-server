@@ -2,13 +2,13 @@ import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registry } from '../utils/registry.js';
 
-// 注册帮助工具
+// Register help tool
 export function registerHelpTool(server: McpServer) {
     server.tool(
         'help',
-        '获取命令的帮助信息',
+        'Get help information for a command',
         {
-            type: z.string().describe('命令类型')
+            type: z.string().describe('Command type')
         },
         async ({ type }) => {
             try {
@@ -31,41 +31,41 @@ export function registerHelpTool(server: McpServer) {
                         content: [
                             {
                                 type: 'text' as const,
-                                text: `命令 ${type} 没有帮助信息`
+                                text: `Command ${type} has no help information`
                             }
                         ],
                         isError: true
                     };
                 }
 
-                // 构建帮助文本
+                // Build help text
                 const helpText = [
-                    `命令: ${type}`,
-                    `描述: ${doc.description}`,
+                    `Command: ${type}`,
+                    `Description: ${doc.description}`,
                     '',
-                    '参数:',
+                    'Parameters:',
                     ...Object.entries(doc.params).map(([key, value]) => 
-                        `  ${key}: ${value.type}${value.required ? ' (必需)' : ' (可选)'}\n    ${value.description}`
+                        `  ${key}: ${value.type}${value.required ? ' (required)' : ' (optional)'}\n    ${value.description}`
                     ),
                     '',
-                    '返回值:',
-                    `  类型: ${doc.returns.type}`,
-                    `  描述: ${doc.returns.description}`,
-                    '  属性:',
+                    'Return Value:',
+                    `  Type: ${doc.returns.type}`,
+                    `  Description: ${doc.returns.description}`,
+                    '  Properties:',
                     ...Object.entries(doc.returns.properties).map(([key, desc]) => 
                         `    ${key}: ${String(desc)}`
                     ),
                     '',
-                    '示例:',
+                    'Examples:',
                     ...doc.examples.map(example => [
                         `  ${example.description}:`,
-                        '    参数:',
+                        '    Parameters:',
                         `      ${JSON.stringify(example.params, null, 2).replace(/\n/g, '\n      ')}`,
-                        '    响应:',
+                        '    Response:',
                         `      ${JSON.stringify(example.response, null, 2).replace(/\n/g, '\n      ')}`
                     ]).flat(),
                     '',
-                    doc.apiLink ? `API文档: ${doc.apiLink}` : ''
+                    doc.apiLink ? `API Documentation: ${doc.apiLink}` : ''
                 ].filter(Boolean).join('\n');
 
                 return {
@@ -85,7 +85,7 @@ export function registerHelpTool(server: McpServer) {
                     content: [
                         {
                             type: 'text' as const,
-                            text: error instanceof Error ? error.message : '获取帮助失败'
+                            text: error instanceof Error ? error.message : 'Failed to get help'
                         }
                     ],
                     isError: true
